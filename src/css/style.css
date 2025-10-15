@@ -7,3 +7,26 @@ body {
 canvas {
     display: block;
 }
+
+#rotate-device {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    color: #fff;
+    font-size: 2em;
+    text-align: center;
+    padding-top: 50%;
+}
+
+@media screen and (max-width: 800px) and (orientation: portrait) {
+    #rotate-device {
+        display: block;
+    }
+    #gameCanvas {
+        display: none;
+    }
+}
