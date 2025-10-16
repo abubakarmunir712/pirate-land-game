@@ -1,6 +1,26 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+const gameOverlay = document.getElementById('gameOverlay');
+const playerNameInput = document.getElementById('playerNameInput');
+const startButton = document.getElementById('startButton');
+const gameOverOverlay = document.getElementById('gameOverOverlay');
+const finalScoreDisplay = document.getElementById('finalScore');
+const playAgainButton = document.getElementById('playAgainButton');
+const gameUI = document.getElementById('gameUI');
+const playerNameDisplay = document.getElementById('playerNameDisplay');
+const playerNameSpan = document.getElementById('playerName');
+const timerDisplay = document.getElementById('timer');
+const scoreDisplay = document.getElementById('score');
+const gameContainer = document.getElementById('game-container');
+
+let gameStarted = false;
+const GAME_DURATION = 60; // seconds
+let timeLeft = GAME_DURATION;
+let score = 0;
+let gameInterval;
+let playerName = "Player";
+
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -73,7 +93,7 @@ const player = {
     y: (MAP_ROWS * TILE_SIZE) / 2,
     width: 64,
     height: 64,
-    speed: 5,
+    speed: 3.5,
     direction: 'south',
     frame: 0,
     animationTimer: 0,
@@ -243,7 +263,71 @@ function drawMap() {
     }
 }
 
+function updateTimer() {
+    timeLeft--;
+    timerDisplay.textContent = timeLeft;
+    if (timeLeft <= 0) {
+        endGame();
+    }
+}
+
+function startGame() {
+    gameOverlay.style.display = 'none';
+    gameOverOverlay.style.display = 'none';
+    gameContainer.style.display = 'block';
+    gameUI.style.display = 'flex';
+
+    gameStarted = true;
+    timeLeft = GAME_DURATION;
+    score = 0;
+    timerDisplay.textContent = timeLeft;
+    scoreDisplay.textContent = score;
+
+    playerName = playerNameInput.value.trim();
+    if (playerName === '') {
+        playerName = 'Player';
+    }
+    playerNameSpan.textContent = playerName;
+
+    // Request fullscreen
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+    } else if (document.documentElement.mozRequestFullScreen) { /* Firefox */
+        document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+        document.documentElement.webkitRequestFullscreen();
+    } else if (document.documentElement.msRequestFullscreen) { /* IE/Edge */
+        document.documentElement.msRequestFullscreen();
+    }
+
+    // Reset player position
+    player.x = (MAP_COLS * TILE_SIZE) / 2;
+    player.y = (MAP_ROWS * TILE_SIZE) / 2;
+
+    // Regenerate map and objects
+    generateMap();
+
+    gameInterval = setInterval(updateTimer, 1000);
+}
+
+function endGame() {
+    gameStarted = false;
+    clearInterval(gameInterval);
+    gameContainer.style.display = 'none';
+    gameUI.style.display = 'none';
+    gameOverOverlay.style.display = 'flex';
+    finalScoreDisplay.textContent = score;
+}
+
+function resetGame() {
+    gameOverOverlay.style.display = 'none';
+    playerNameInput.value = ''; // Clear the input field
+    startGame();
+}
+
 function update() {
+    if (!gameStarted) return;
+
     let nextX = player.x;
     let nextY = player.y;
     let moving = false;
@@ -315,6 +399,8 @@ function update() {
 }
 
 function draw() {
+    if (!gameStarted) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // save context
@@ -365,6 +451,11 @@ for (const dir of directions) {
 Promise.all(allLoadedImages.map(img => new Promise(resolve => img.onload = resolve))).then(() => {
     generateMap();
     gameLoop();
+    // Initial setup: hide game elements, show start screen
+    gameContainer.style.display = 'none';
+    gameUI.style.display = 'none';
+    gameOverOverlay.style.display = 'none';
+    gameOverlay.style.display = 'flex';
 });
 
 const upButton = document.getElementById('up');
@@ -416,3 +507,7 @@ document.addEventListener('fullscreenchange', () => {
         fullscreenButton.textContent = 'Fullscreen';
     }
 });
+
+// Event Listeners for game control buttons
+startButton.addEventListener('click', startGame);
+playAgainButton.addEventListener('click', resetGame);
