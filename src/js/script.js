@@ -92,6 +92,31 @@ function generateMap() {
     }
 }
 
+function isWalkable(x, y) {
+    const corners = [
+        { x: x, y: y }, // top-left
+        { x: x + player.width - 1, y: y }, // top-right
+        { x: x, y: y + player.height - 1 }, // bottom-left
+        { x: x + player.width - 1, y: y + player.height - 1 } // bottom-right
+    ];
+
+    for (const corner of corners) {
+        const tileX = Math.floor(corner.x / TILE_SIZE);
+        const tileY = Math.floor(corner.y / TILE_SIZE);
+
+        if (tileX < 0 || tileX >= MAP_COLS || tileY < 0 || tileY >= MAP_ROWS) {
+            return false; // Out of bounds
+        }
+
+        const tile = map[tileY][tileX];
+        if (tile === 'water') {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function drawMap() {
     // Draw base tiles
     for (let row = 0; row < MAP_ROWS; row++) {
@@ -110,17 +135,28 @@ function drawMap() {
 }
 
 function update() {
+    let nextX = player.x;
+    let nextY = player.y;
+
     if (keys.w || keys.ArrowUp) {
-        player.y -= player.speed;
+        nextY -= player.speed;
     }
     if (keys.s || keys.ArrowDown) {
-        player.y += player.speed;
+        nextY += player.speed;
     }
     if (keys.a || keys.ArrowLeft) {
-        player.x -= player.speed;
+        nextX -= player.speed;
     }
     if (keys.d || keys.ArrowRight) {
-        player.x += player.speed;
+        nextX += player.speed;
+    }
+
+    if (isWalkable(nextX, player.y)) {
+        player.x = nextX;
+    }
+
+    if (isWalkable(player.x, nextY)) {
+        player.y = nextY;
     }
 
     // update camera to follow player
