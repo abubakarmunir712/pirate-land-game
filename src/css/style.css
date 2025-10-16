@@ -2,6 +2,7 @@ body {
     margin: 0;
     overflow: hidden;
     background-color: #333;
+    user-select: none;
 }
 
 canvas {
@@ -22,11 +23,66 @@ canvas {
     padding-top: 50%;
 }
 
+#controls {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    display: none;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+#left-controls {
+    display: flex;
+    flex-direction: column;
+}
+
+#right-controls {
+    display: flex;
+    flex-direction: row;
+}
+
+#controls button {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    margin: 5px;
+    user-select: none;
+}
+
+#fullscreen-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    font-size: 16px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: 2px solid white;
+    border-radius: 10px;
+    display: none;
+}
+
 @media screen and (max-width: 800px) and (orientation: portrait) {
     #rotate-device {
         display: block;
     }
     #gameCanvas {
         display: none;
+    }
+}
+
+@media (pointer: coarse) {
+    #controls {
+        display: flex;
+    }
+    #fullscreen-btn {
+        display: block;
     }
 }
