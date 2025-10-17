@@ -85,8 +85,10 @@ function loadPlayerAnimations() {
 
 loadPlayerAnimations();
 
-const objects = ['chest', 'rock', 'tree_lg', 'tree_md', 'tree_simple', 'tree_stump_short', 'tree_stump_tall'];
+const objects = ['rock', 'tree_lg', 'tree_md', 'tree_simple', 'tree_stump_short', 'tree_stump_tall'];
 let spawnedObjects = [];
+let chests = [];
+let effects = [];
 
 const player = {
     x: (MAP_COLS * TILE_SIZE) / 2,
@@ -154,6 +156,7 @@ function generateMap() {
 
     const numObjects = 50;
     spawnedObjects = [];
+    chests = [];
 
     for (let i = 0; i < numObjects; i++) {
         const objectName = objects[Math.floor(Math.random() * objects.length)];
@@ -180,6 +183,43 @@ function generateMap() {
                     validPosition = true;
                     map[row][col] = objectName;
                     spawnedObjects.push({ row, col });
+                }
+            }
+        }
+    }
+
+    const numChests = 15;
+    for (let i = 0; i < numChests; i++) {
+        let row, col;
+        let attempts = 0;
+        let validPosition = false;
+        while (!validPosition && attempts < 100) {
+            attempts++;
+            row = Math.floor(Math.random() * MAP_ROWS);
+            col = Math.floor(Math.random() * MAP_COLS);
+
+            if (map[row][col] === 'grass') {
+                let tooClose = false;
+                for (const spawned of spawnedObjects) {
+                    const dist = Math.sqrt(Math.pow(row - spawned.row, 2) + Math.pow(col - spawned.col, 2));
+                    if (dist < 2) {
+                        tooClose = true;
+                        break;
+                    }
+                }
+                if (!tooClose) {
+                    for (const chest of chests) {
+                        const dist = Math.sqrt(Math.pow(row - chest.row, 2) + Math.pow(col - chest.col, 2));
+                        if (dist < 5) {
+                            tooClose = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!tooClose) {
+                    validPosition = true;
+                    chests.push({ row, col });
                 }
             }
         }
@@ -261,6 +301,13 @@ function drawMap() {
             ctx.drawImage(assets.images[objectName], x - (OBJECT_SIZE - TILE_SIZE) / 2, y - (OBJECT_SIZE - TILE_SIZE) / 2, OBJECT_SIZE, OBJECT_SIZE);
         }
     }
+
+    // 3. Draw chests
+    for (const chest of chests) {
+        const x = chest.col * TILE_SIZE;
+        const y = chest.row * TILE_SIZE;
+        ctx.drawImage(assets.images.chest, x - (OBJECT_SIZE - TILE_SIZE) / 2, y - (OBJECT_SIZE - TILE_SIZE) / 2, OBJECT_SIZE, OBJECT_SIZE);
+    }
 }
 
 function updateTimer() {
@@ -325,6 +372,50 @@ function resetGame() {
     startGame();
 }
 
+function checkChestCollision() {
+    const collisionWidth = player.width * 0.5;
+    const collisionHeight = player.height * 0.7;
+    const collisionX = player.x + (player.width - collisionWidth) / 2;
+    const collisionY = player.y + (player.height - collisionHeight) / 2;
+    const playerRect = { x: collisionX, y: collisionY, width: collisionWidth, height: collisionHeight };
+
+    for (let i = chests.length - 1; i >= 0; i--) {
+        const chest = chests[i];
+        const chestRect = {
+            x: chest.col * TILE_SIZE - (OBJECT_SIZE - TILE_SIZE) / 2,
+            y: chest.row * TILE_SIZE - (OBJECT_SIZE - TILE_SIZE) / 2,
+            width: OBJECT_SIZE,
+            height: OBJECT_SIZE
+        };
+
+        if (
+            playerRect.x < chestRect.x + chestRect.width &&
+            playerRect.x + playerRect.width > chestRect.x &&
+            playerRect.y < chestRect.y + chestRect.height &&
+            playerRect.y + playerRect.height > chestRect.y
+        ) {
+            chests.splice(i, 1); // Remove the chest
+            score++;
+            scoreDisplay.textContent = score;
+
+            const coinFlip = document.createElement('img');
+            coinFlip.src = 'assets/images/bg/coin_flip.gif';
+            coinFlip.style.position = 'absolute';
+            coinFlip.style.width = `${OBJECT_SIZE}px`;
+            coinFlip.style.height = `${OBJECT_SIZE}px`;
+
+            const effect = { 
+                element: coinFlip, 
+                x: chestRect.x, 
+                y: chestRect.y, 
+                timer: 60 // 1 second at 60fps
+            };
+            effects.push(effect);
+            gameContainer.appendChild(coinFlip);
+        }
+    }
+}
+
 function update() {
     if (!gameStarted) return;
 
@@ -385,6 +476,21 @@ function update() {
         player.x = nextX;
     } else if (isWalkable(player.x, nextY)) {
         player.y = nextY;
+    }
+
+    checkChestCollision();
+
+    // Update effects
+    for (let i = effects.length - 1; i >= 0; i--) {
+        const effect = effects[i];
+        effect.timer--;
+        if (effect.timer <= 0) {
+            gameContainer.removeChild(effect.element);
+            effects.splice(i, 1);
+        } else {
+            effect.element.style.left = `${effect.x - camera.x}px`;
+            effect.element.style.top = `${effect.y - camera.y}px`;
+        }
     }
 
     // update camera to follow player
