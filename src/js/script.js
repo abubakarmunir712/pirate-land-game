@@ -31,8 +31,8 @@ resizeCanvas();
 
 const TILE_SIZE = 32;
 const OBJECT_SIZE = 48;
-const MAP_ROWS = 100;
-const MAP_COLS = 100;
+const MAP_ROWS = 140;
+const MAP_COLS = 140;
 
 const assets = {
     images: {
@@ -154,7 +154,7 @@ function generateMap() {
         }
     }
 
-    const numObjects = 50;
+    const numObjects = 65;
     spawnedObjects = [];
     chests = [];
 
@@ -516,7 +516,7 @@ function draw() {
     ctx.translate(-Math.round(camera.x), -Math.round(camera.y));
 
     drawMap();
-    ctx.drawImage(assets.animations.player[player.direction][player.frame], player.x, player.y, player.width, player.height);
+    ctx.drawImage(assets.animations.player[player.direction][player.frame], Math.round(player.x), Math.round(player.y), player.width, player.height);
 
     /*
     // Draw bounding boxes for debugging
