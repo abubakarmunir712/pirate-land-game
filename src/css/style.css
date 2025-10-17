@@ -112,23 +112,29 @@ canvas {
 #left-controls {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 #right-controls {
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 
 #controls button {
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
+    width: 70px;
+    height: 70px;
+    font-size: 30px;
     background: rgba(0, 0, 0, 0.5);
     color: white;
     border: 2px solid white;
     border-radius: 50%;
     margin: 5px;
     user-select: none;
+    touch-action: manipulation;
+    transition: background-color 0.1s ease;
 }
 
 #fullscreen-btn {

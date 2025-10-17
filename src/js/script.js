@@ -154,7 +154,7 @@ function generateMap() {
         }
     }
 
-    const numObjects = 65;
+    const numObjects = 190;
     spawnedObjects = [];
     chests = [];
 
@@ -171,11 +171,16 @@ function generateMap() {
 
             if (map[row][col] === 'grass') {
                 let tooClose = false;
-                for (const spawned of spawnedObjects) {
-                    const dist = Math.sqrt(Math.pow(row - spawned.row, 2) + Math.pow(col - spawned.col, 2));
-                    if (dist < 5) {
-                        tooClose = true;
-                        break;
+                const distFromPlayerSpawn = Math.sqrt(Math.pow(row - MAP_ROWS / 2, 2) + Math.pow(col - MAP_COLS / 2, 2));
+                if (distFromPlayerSpawn < 10) {
+                    tooClose = true;
+                } else {
+                    for (const spawned of spawnedObjects) {
+                        const dist = Math.sqrt(Math.pow(row - spawned.row, 2) + Math.pow(col - spawned.col, 2));
+                        if (dist < 5) {
+                            tooClose = true;
+                            break;
+                        }
                     }
                 }
 
@@ -200,19 +205,24 @@ function generateMap() {
 
             if (map[row][col] === 'grass') {
                 let tooClose = false;
-                for (const spawned of spawnedObjects) {
-                    const dist = Math.sqrt(Math.pow(row - spawned.row, 2) + Math.pow(col - spawned.col, 2));
-                    if (dist < 2) {
-                        tooClose = true;
-                        break;
-                    }
-                }
-                if (!tooClose) {
-                    for (const chest of chests) {
-                        const dist = Math.sqrt(Math.pow(row - chest.row, 2) + Math.pow(col - chest.col, 2));
-                        if (dist < 5) {
+                const distFromPlayerSpawn = Math.sqrt(Math.pow(row - MAP_ROWS / 2, 2) + Math.pow(col - MAP_COLS / 2, 2));
+                if (distFromPlayerSpawn < 10) {
+                    tooClose = true;
+                } else {
+                    for (const spawned of spawnedObjects) {
+                        const dist = Math.sqrt(Math.pow(row - spawned.row, 2) + Math.pow(col - spawned.col, 2));
+                        if (dist < 2) {
                             tooClose = true;
                             break;
+                        }
+                    }
+                    if (!tooClose) {
+                        for (const chest of chests) {
+                            const dist = Math.sqrt(Math.pow(row - chest.row, 2) + Math.pow(col - chest.col, 2));
+                            if (dist < 5) {
+                                tooClose = true;
+                                break;
+                            }
                         }
                     }
                 }
