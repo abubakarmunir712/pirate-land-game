@@ -31,8 +31,8 @@ resizeCanvas();
 
 const TILE_SIZE = 32;
 const OBJECT_SIZE = 48;
-const MAP_ROWS = 140;
-const MAP_COLS = 140;
+const MAP_ROWS = 120;
+const MAP_COLS = 120;
 
 const assets = {
     images: {
@@ -154,7 +154,7 @@ function generateMap() {
         }
     }
 
-    const numObjects = 190;
+    const numObjects = 110;
     spawnedObjects = [];
     chests = [];
 
